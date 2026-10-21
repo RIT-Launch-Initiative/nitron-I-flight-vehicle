@@ -1,7 +1,6 @@
 %% Adjusted simulation tool
 % Liquid Propulsion Aerostructures
 % Last updated 8 November 2025
-% 
 %% Setup
 clear; close all; clc;
 % Retrieve openrocket
@@ -52,10 +51,10 @@ L = rocket.getLength();
 
 %% Text output
 header = ["", "440 psi", "472 psi", "543 psi", "620 psi", "705 psi", "800 psi", "850 psi"];
-apogees = ["Apogee [m]:", summary1.apogee, summary2.apogee, summary3.apogee,...
+apogees = ["Apogee [ft]:", summary1.apogee, summary2.apogee, summary3.apogee,...
     summary4.apogee, summary5.apogee, summary6.apogee, summary7.apogee];
 
-rodExits = ["Rod Exit Velocity [m/s]:", summary1.rodExit, summary2.rodExit,...
+rodExits = ["Rod Exit Velocity [ft/s]:", summary1.rodExit, summary2.rodExit,...
     summary3.rodExit, summary4.rodExit, summary5.rodExit, summary6.rodExit, summary7.rodExit];
 
 stabs1 = ["Rod Exit Stability [%]:", summary1.stabLaunch, summary2.stabLaunch,...
@@ -79,6 +78,12 @@ fprintf("%24s%12s%12s%12s%12s%12s%12s%12s\n", flutter(1), flutter(2), flutter(3)
 pressures = [440, 472, 543, 620, 705, 800, 850];
 stabsVec = [summary1.stabLaunch, summary2.stabLaunch, summary3.stabLaunch, summary4.stabLaunch,...
     summary5.stabLaunch, summary6.stabLaunch, summary7.stabLaunch];
+velVec = [summary1.maxVel, summary2.maxVel, summary3.maxVel, summary4.maxVel,...
+    summary5.maxVel, summary6.maxVel, summary7.maxVel];
+apogeeVec = [summary1.apogee, summary2.apogee, summary3.apogee, summary4.apogee,...
+    summary5.apogee, summary6.apogee, summary7.apogee];
+rodVec = [summary1.rodExit, summary2.rodExit, summary3.rodExit, summary4.rodExit,...
+    summary5.rodExit, summary6.rodExit, summary7.rodExit];
 figure(name = "Stability vs Tank Pressure")
 plot(pressures, stabsVec);
 title("Rod Exit Stability vs Tank Pressure");
@@ -87,9 +92,35 @@ xlim([430 860])
 ylabel("Rod Exit Stability [%]")
 ylim([6 10])
 
+figure(name = "Apogee vs Tank Pressure")
+plot(pressures, apogeeVec);
+title("Apogee vs Tank Pressure");
+xlabel("Tank Pressure [psi]")
+xlim([430 860])
+ylabel("Apogee [ft]")
+ylim([8000 9000])
+
+figure(name = "Maximum Velocity vs Tank Pressure")
+plot(pressures, velVec);
+title("Maximum Velocity vs Tank Pressure");
+xlabel("Tank Pressure [psi]")
+xlim([430 860])
+ylabel("Maximum Velocity [ft/s]")
+ylim([700 900])
+
+figure(name = "Rod Exit Velocity vs Tank Pressure")
+plot(pressures, rodVec);
+title("Rod Exit Velocity vs Tank Pressure");
+xlabel("Tank Pressure [psi]")
+xlim([430 860])
+ylabel("Rod Exit Velocity [ft/s]")
+ylim([0 100])
+
 %% Other Plots
 plotStabPercent(simData4)
 plotBasic(simData4);
+
+close all;
 
 %% Functions
 function plotStabPercent(simData)
@@ -121,13 +152,13 @@ function plotBasic(simData)
     yyaxis("left")
     plot(simData, "Time", "Altitude", "Color","b");
     ylim([0,yMax])
-    ylabel("Altitude [m]")
+    ylabel("Altitude [ft]")
     hold on;
     % Right side
     yyaxis("right")
     plot(simData, "Time", "Total velocity", "Color", "r");
     hold off;
-    ylabel("Velocity [m/s]")
+    ylabel("Velocity [ft/s]")
     % Other plot related things
     xlabel("Time [s]")
     title("Vehicle Motion")
@@ -186,6 +217,9 @@ function data = addReport(data)
     data.("Air density") = data.("Air pressure")./(1000*R*data.("Air temperature"));
     data.("Dynamic pressure") = 0.5*data.("Air density").*data.("Total velocity").^2;
     data.("Stability percent") = 100*data.("Stability margin")*D/L;
+    % ft conversions
+    data.("Total velocity") = data.("Total velocity")*3.28084;
+    data.("Altitude") = data.("Altitude")*3.28084;
 end
 
 function summary = summaryGen(data, fins, times)
@@ -203,6 +237,8 @@ function summary = summaryGen(data, fins, times)
 
     % Flutter
     summary.flutterFOS = FOS_finflutter(data, fins);
+
+    summary.maxVel = max(data.("Total velocity"));
     
     % Dynamic pressure
     qData = data(ascentRange, "Dynamic pressure").("Dynamic pressure");

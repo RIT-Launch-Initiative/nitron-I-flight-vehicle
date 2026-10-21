@@ -2,11 +2,11 @@
 %% Setup
 clear; close all; clc;
 % Inputs
-motorName = "Nitron_I_55F";
+motorName = "Nitron_I_HOTFIRE2";
 oxMass = 3.386; % kg
 fuelMass = 1.411; % kg
 % Import the thrust curve as CSV
-csvFilePath = "C:\nitron-I-flight-vehicle\Analysis\HalfCatSim\nitron1_55F.csv";
+csvFilePath = "C:\nitron-I-flight-vehicle\Motor Files\csv data\hotfire2_interp.mat";
 thrustData = importdata(csvFilePath);
 %% Data processing
 % Create duration vector from first column for timetable
@@ -27,7 +27,7 @@ newMotor.Properties.UserData.propmass_kg = (oxMass + fuelMass);
 newMotor.Properties.UserData.wetmass_kg = (oxMass + fuelMass);
 newMotor.Properties.UserData.manufacturer = "RIT_Launch_Initiative";
 % Define description
-descStr = motorName + newline + "Created by Juno Afko 10 November 2025";
+descStr = motorName + newline + "Created by Juno Afko 20 October 2026";
 newMotor.Properties.Description = descStr;
 % Export
 outStr = "C:\nitron-I-flight-vehicle\Motor Files\" + motorName + ".eng";
